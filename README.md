@@ -20,11 +20,17 @@ algo_market_making/
 │   └── visualization/
 │       ├── simulation.py       # Time-series plots
 │       └── distributions.py    # Monte Carlo distribution plots
-├── notebooks/                  # Exploratory analysis and paper reproductions
+├── notebooks/                  # Source notebooks (no generated files)
 │   ├── naive_market_making.ipynb
 │   ├── inventory_adjusted_market_making.ipynb
 │   ├── avellaneda_stoikov.ipynb
 │   └── bond_market_making_hit_ratio.ipynb
+├── references/                 # Source papers (PDFs)
+│   └── papers/
+│       └── bond-market-making-hit-ratio.pdf
+├── outputs/                    # Generated artifacts (gitignored except .gitkeep)
+│   └── notebooks/
+│       └── bond_market_making_hit_ratio/   # figures from bond notebook
 ├── tests/                      # pytest suite
 ├── pyproject.toml
 ├── LICENSE
