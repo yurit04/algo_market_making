@@ -33,7 +33,7 @@ algo_market_making/
 
 ## Installation
 
-Requires **Python 3.9+** and [uv](https://docs.astral.sh/uv/getting-started/installation/).
+Requires **Python 3.12** and [uv](https://docs.astral.sh/uv/getting-started/installation/).
 
 ### 1. Clone the repository
 
@@ -50,10 +50,10 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ### 3. Create a virtual environment and install dependencies
 
-Create a local `.venv` and install the package in editable mode (includes dev tools for tests and notebooks):
+Create a local `.venv` with Python 3.12 and install the package in editable mode (includes dev tools for tests and notebooks):
 
 ```bash
-uv venv
+uv venv --python 3.12
 uv pip install -e ".[dev]"
 ```
 
