@@ -33,7 +33,7 @@ algo_market_making/
 
 ## Installation
 
-Requires **Python 3.9+**.
+Requires **Python 3.9+** and [uv](https://docs.astral.sh/uv/getting-started/installation/).
 
 ### 1. Clone the repository
 
@@ -42,31 +42,31 @@ git clone https://github.com/yuriturygin/algo_market_making.git
 cd algo_market_making
 ```
 
-### 2. Create and activate a virtual environment (recommended)
+### 2. Install uv (if needed)
 
 ```bash
-python -m venv .venv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+### 3. Create a virtual environment and install dependencies
+
+Create a local `.venv` and install the package in editable mode (includes dev tools for tests and notebooks):
+
+```bash
+uv venv
+uv pip install -e ".[dev]"
+```
+
+Activate the environment when working in a shell (optional — `uv run` works without activation):
+
+```bash
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
-```
-
-### 3. Install the package
-
-Install the library in editable mode so local changes are picked up immediately:
-
-```bash
-pip install -e .
-```
-
-For development (tests, Jupyter notebooks):
-
-```bash
-pip install -e ".[dev]"
 ```
 
 ### 4. Verify the install
 
 ```bash
-pytest
+uv run pytest
 ```
 
 ## Quick example
@@ -85,7 +85,7 @@ plot_simulation(result)
 Open any notebook under `notebooks/` after installing with the `dev` extra:
 
 ```bash
-jupyter notebook
+uv run jupyter notebook
 ```
 
 | Notebook | Topic |
