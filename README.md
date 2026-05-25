@@ -17,9 +17,11 @@ algo_market_making/
 │   │   └── monte_carlo.py      # Multi-path batch runs
 │   ├── metrics/
 │   │   └── performance.py      # Sharpe, Sortino, drawdown, etc.
-│   └── visualization/
-│       ├── simulation.py       # Time-series plots
-│       └── distributions.py    # Monte Carlo distribution plots
+│   ├── visualization/
+│   │   ├── simulation.py       # Time-series plots
+│   │   └── distributions.py    # Monte Carlo distribution plots
+│   └── data/                   # Local Databento DBN ingestion (optional [data] extra)
+│       └── databento/
 ├── notebooks/                  # Source notebooks (no generated files)
 │   ├── naive_market_making.ipynb
 │   ├── inventory_adjusted_market_making.ipynb
@@ -86,6 +88,38 @@ print(compute_metrics(result.pnl))
 plot_simulation(result)
 ```
 
+## Databento CME data (local)
+
+If you keep [Databento](https://databento.com) batch downloads under `~/Documents/Databento/CME-Futures`, install the `data` extra and use `algo_mm.data`:
+
+```bash
+uv pip install -e ".[data]"
+```
+
+```python
+from algo_mm.data import CMEDataCatalog, load, iter_load
+
+catalog = CMEDataCatalog()  # or CMEDataCatalog("/path/to/CME-Futures")
+print(catalog.list_schemas())
+print(catalog.describe())
+
+df = load("ohlcv-1m", symbols="ES.FUT", start="2024-06-01", end="2024-06-02")
+
+# MBO / MBP shards: one DataFrame per .dbn file
+for chunk in iter_load("mbo", start="2025-06-08", end="2025-06-09", symbols="ES.FUT"):
+    ...
+```
+
+Set `DATABENTO_DATA_ROOT` to override the default path. See `notebooks/databento_cme_ingestion.ipynb`.
+
+| Local folder | Databento schema |
+|--------------|------------------|
+| `MBO` | `mbo` |
+| `MBO-10` | `mbp-10` |
+| `TTBO` | `tbbo` |
+| `OHLCV-1s` | `ohlcv-1s` |
+| `OHLCV-1m` / `1h` / `1d` | `ohlcv-1m` / `1h` / `1d` |
+
 ## Notebooks
 
 Open any notebook under `notebooks/` after installing with the `dev` extra:
@@ -100,6 +134,7 @@ uv run jupyter notebook
 | `inventory_adjusted_market_making.ipynb` | Spread skew from inventory |
 | `avellaneda_stoikov.ipynb` | Avellaneda–Stoikov (2008) optimal quotes |
 | `bond_market_making_hit_ratio.ipynb` | Bond MM with a target hit ratio |
+| `databento_cme_ingestion.ipynb` | Load local Databento CME DBN batch files |
 
 ## License
 
