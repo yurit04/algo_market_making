@@ -9,6 +9,7 @@ import pytest
 
 from algo_mm.data.databento.catalog import CMEDataCatalog, _file_overlaps
 from algo_mm.data.databento.filters import symbol_matches
+from algo_mm.data.databento.loader import apply_pretty_px
 from algo_mm.data.databento.paths import (
     DbFileInfo,
     normalize_schema,
@@ -40,6 +41,15 @@ def test_parse_dbn_filename_range_and_part() -> None:
     assert info.start == date(2010, 6, 6)
     assert info.end == date(2025, 6, 27)
     assert info.part == 8
+
+
+def test_apply_pretty_px_scales_fixed_point() -> None:
+    import pandas as pd
+
+    df = pd.DataFrame({"open": [5_302_000_000_000], "close": [5_302_500_000_000]})
+    out = apply_pretty_px(df)
+    assert out["open"].iloc[0] == 5302.0
+    assert out["close"].iloc[0] == 5302.5
 
 
 def test_symbol_matches_parent() -> None:

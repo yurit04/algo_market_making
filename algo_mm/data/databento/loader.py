@@ -7,11 +7,13 @@ import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Iterator
 
+import numpy as np
 import pandas as pd
 
 from algo_mm.data.databento.catalog import CMEDataCatalog
 from algo_mm.data.databento.filters import filter_dataframe, parse_time
 from algo_mm.data.databento.paths import normalize_schema, resolve_data_root
+from algo_mm.data.databento.contracts import enrich_futures_contracts
 from algo_mm.data.databento.symbology import (
     build_symbol_lookup,
     instrument_ids_for_symbols,
@@ -23,6 +25,7 @@ if TYPE_CHECKING:
 _DEFAULT_CATALOG: CMEDataCatalog | None = None
 # Above this size, scan records and filter in one pass instead of materializing the full file.
 _STREAM_THRESHOLD_BYTES = 400 * 1024 * 1024
+_PRICE_COLUMNS = frozenset({"open", "high", "low", "close", "price"})
 
 
 def _require_databento() -> type:
@@ -54,6 +57,32 @@ def open_dbn(path: str | Path, *, inject_symbology: bool = True) -> "db.DBNStore
     return store
 
 
+def _price_type(pretty_px: bool) -> str:
+    """Map our ``pretty_px`` flag to Databento ``price_type`` (v0.78+)."""
+    return "float" if pretty_px else "fixed"
+
+
+def apply_pretty_px(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Convert Databento fixed-point prices (int × 1e-9) to floats.
+
+    Raw DBN values like ``5302000000000`` are ~5302.00, not epoch timestamps.
+    """
+    try:
+        from databento_dbn import FIXED_PRICE_SCALE, UNDEF_PRICE
+    except ImportError:
+        FIXED_PRICE_SCALE = 1e-9
+        UNDEF_PRICE = 9223372036854775807
+
+    out = df.copy()
+    for col in _PRICE_COLUMNS:
+        if col not in out.columns:
+            continue
+        out[col] = pd.to_numeric(out[col], errors="coerce")
+        out[col] = out[col].replace(UNDEF_PRICE, np.nan) / FIXED_PRICE_SCALE
+    return out
+
+
 def load(
     schema: str,
     *,
@@ -63,6 +92,8 @@ def load(
     root: str | Path | None = None,
     job_id: str | None = None,
     map_symbols: bool = True,
+    pretty_px: bool = True,
+    contract_metadata: bool = False,
     streaming: bool | None = None,
     catalog: CMEDataCatalog | None = None,
 ) -> pd.DataFrame:
@@ -83,9 +114,15 @@ def load(
         Restrict to a single batch folder (e.g. ``"GLBX-20250608-ESWGBFBE48"``).
     map_symbols
         Add a ``symbol`` column via symbology (recommended).
+    pretty_px
+        If True (default), scale ``open``/``high``/``low``/``close`` from fixed-point
+        integers to floats (divide by 1e-9 per Databento encoding).
     streaming
         If True, stream/filter large DBN shards in one pass (less memory).
         Default: on when any shard exceeds ~400MB and a time or symbol filter is set.
+    contract_metadata
+        If True, add ``activation``, ``expiration``, ``contract_rank`` (0=front),
+        and ``contract_label`` (front/next/...) using symbology + CME expiry rules.
 
     Examples
     --------
@@ -112,6 +149,7 @@ def load(
         _read_dbn_file(
             p,
             map_symbols=map_symbols,
+            pretty_px=pretty_px,
             symbols=symbols,
             start=start,
             end=end,
@@ -122,6 +160,12 @@ def load(
     df = pd.concat(frames, axis=0) if len(frames) > 1 else frames[0]
     if not use_stream:
         df = filter_dataframe(df, symbols=symbols, start=start, end=end)
+    if contract_metadata:
+        sym_path = paths[0].parent / "symbology.json"
+        df = enrich_futures_contracts(
+            df,
+            symbology_path=sym_path if sym_path.is_file() else None,
+        )
     return df
 
 
@@ -134,6 +178,7 @@ def iter_load(
     root: str | Path | None = None,
     job_id: str | None = None,
     map_symbols: bool = True,
+    pretty_px: bool = True,
     catalog: CMEDataCatalog | None = None,
 ) -> Iterator[pd.DataFrame]:
     """
@@ -152,6 +197,7 @@ def iter_load(
         df = _read_dbn_file(
             path,
             map_symbols=map_symbols,
+            pretty_px=pretty_px,
             symbols=symbols,
             start=start,
             end=end,
@@ -192,7 +238,12 @@ def ingest_parquet(
             written.append(out_path)
             continue
         store = open_dbn(dbn_path)
-        store.to_parquet(out_path, map_symbols=map_symbols, mode="w")
+        store.to_parquet(
+            out_path,
+            map_symbols=map_symbols,
+            price_type="float",
+            mode="w",
+        )
         written.append(out_path)
     return written
 
@@ -243,6 +294,7 @@ def _read_dbn_file(
     path: Path,
     *,
     map_symbols: bool,
+    pretty_px: bool = True,
     symbols: str | list[str] | None = None,
     start: str | None = None,
     end: str | None = None,
@@ -255,8 +307,12 @@ def _read_dbn_file(
             start=start,
             end=end,
             map_symbols=map_symbols,
+            pretty_px=pretty_px,
         )
-    return open_dbn(path).to_df(map_symbols=map_symbols)
+    return open_dbn(path).to_df(
+        map_symbols=map_symbols,
+        price_type=_price_type(pretty_px),
+    )
 
 
 def _stream_filtered_dbn(
@@ -266,6 +322,7 @@ def _stream_filtered_dbn(
     start: str | None,
     end: str | None,
     map_symbols: bool,
+    pretty_px: bool = True,
 ) -> pd.DataFrame:
     store = open_dbn(path)
     start_ts = parse_time(start)
@@ -318,6 +375,8 @@ def _stream_filtered_dbn(
             df["instrument_id"].to_numpy(),
             dates,
         )
+    if pretty_px:
+        df = apply_pretty_px(df)
     return df
 
 

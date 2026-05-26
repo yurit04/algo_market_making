@@ -144,6 +144,52 @@ class CMEDataCatalog:
     def iter_jobs(self, schema: str) -> Iterator[BatchJob]:
         yield from self.batches(schema)
 
+    def list_contracts(
+        self,
+        schema: str,
+        *,
+        job_id: str | None = None,
+        parent: str | list[str] | None = None,
+        start: str | date | None = None,
+        end: str | date | None = None,
+    ) -> pd.DataFrame:
+        """
+        List every contract (raw symbol) in local batch data for this schema.
+
+        See :func:`algo_mm.data.list_contracts` for parameter details.
+        """
+        from algo_mm.data.databento.contracts_catalog import contracts_for_schema
+
+        return contracts_for_schema(
+            self,
+            schema,
+            job_id=job_id,
+            parent=parent,
+            start=start,
+            end=end,
+        )
+
+    def list_parent_symbols(
+        self,
+        schema: str,
+        *,
+        job_id: str | None = None,
+        as_dataframe: bool = False,
+    ) -> list[str] | pd.DataFrame:
+        """
+        List parent symbols (e.g. ``ES.FUT``) requested in local batch jobs for this schema.
+
+        See :func:`algo_mm.data.list_parent_symbols`.
+        """
+        from algo_mm.data.databento.contracts_catalog import parent_symbols_for_schema
+
+        return parent_symbols_for_schema(
+            self,
+            schema,
+            job_id=job_id,
+            as_dataframe=as_dataframe,
+        )
+
 
 def _load_batch_job(job_dir: Path, schema: str) -> BatchJob | None:
     meta_path = job_dir / "metadata.json"

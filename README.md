@@ -103,6 +103,9 @@ catalog = CMEDataCatalog()  # or CMEDataCatalog("/path/to/CME-Futures")
 print(catalog.list_schemas())
 print(catalog.describe())
 
+parents = list_parent_symbols("ohlcv-1m")  # e.g. ES.FUT, NQ.FUT, ...
+contracts = list_contracts("ohlcv-1m", parent="ES.FUT")  # all ES outrights in symbology
+
 df = load("ohlcv-1m", symbols="ES.FUT", start="2024-06-01", end="2024-06-02")
 
 # MBO / MBP shards: one DataFrame per .dbn file
