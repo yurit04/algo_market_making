@@ -13,6 +13,9 @@ dependencies = [
     "scipy>=1.10",
 ]
 
+[project.scripts]
+algo-mm-rl = "algo_mm.rl.cli:main"
+
 [project.optional-dependencies]
 data = [
     "databento>=0.48",

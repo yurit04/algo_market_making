@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from pathlib import Path
 
-DEFAULT_DATA_ROOT = Path.home() / "Documents" / "Databento" / "CME-Futures"
+DEFAULT_DATA_ROOT = Path.home() / "Documents" / "market_data" / "Databento" / "CME-Futures"
 
 # Folder names on disk -> Databento schema ids (metadata.json "schema" field).
 FOLDER_TO_SCHEMA: dict[str, str] = {
