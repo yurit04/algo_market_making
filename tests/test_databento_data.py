@@ -14,9 +14,10 @@ from algo_mm.data.databento.paths import (
     DbFileInfo,
     normalize_schema,
     parse_dbn_filename,
+    resolve_data_root,
 )
 
-DATABENTO_ROOT = Path.home() / "Documents" / "Databento" / "CME-Futures"
+DATABENTO_ROOT = resolve_data_root()
 
 
 def test_normalize_schema_aliases() -> None:

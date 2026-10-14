@@ -49,7 +49,7 @@ class CMEDataCatalog:
     """
     Discover and load CME Globex (GLBX.MDP3) data from local Databento batch downloads.
 
-    Default root: ``~/Documents/Databento/CME-Futures`` or ``DATABENTO_DATA_ROOT``.
+    Default root: ``~/Documents/market_data/Databento/CME-Futures`` or ``DATABENTO_DATA_ROOT``.
     """
 
     def __init__(self, root: str | Path | None = None) -> None:

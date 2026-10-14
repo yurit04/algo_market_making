@@ -109,7 +109,7 @@ def load(
     start, end
         UTC range filter on the event timestamp index (``end`` exclusive).
     root
-        Override data root (default: ``DATABENTO_DATA_ROOT`` or ~/Documents/Databento/CME-Futures).
+        Override data root (default: ``DATABENTO_DATA_ROOT`` or ~/Documents/market_data/Databento/CME-Futures).
     job_id
         Restrict to a single batch folder (e.g. ``"GLBX-20250608-ESWGBFBE48"``).
     map_symbols

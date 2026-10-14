@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import date
-from pathlib import Path
 
 import pandas as pd
 
@@ -13,8 +12,9 @@ from algo_mm.data.databento.contracts import (
     enrich_futures_contracts,
     parse_outright_symbol,
 )
+from algo_mm.data.databento.paths import resolve_data_root
 
-SYMOLOGY = Path.home() / "Documents/Databento/CME-Futures/OHLCV-1m/GLBX-20250608-ESWGBFBE48/symbology.json"
+SYMOLOGY = resolve_data_root() / "OHLCV-1m" / "GLBX-20250608-ESWGBFBE48" / "symbology.json"
 
 
 def test_parse_esm0() -> None:

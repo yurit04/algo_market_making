@@ -90,7 +90,7 @@ plot_simulation(result)
 
 ## Databento CME data (local)
 
-If you keep [Databento](https://databento.com) batch downloads under `~/Documents/Databento/CME-Futures`, install the `data` extra and use `algo_mm.data`:
+If you keep [Databento](https://databento.com) batch downloads under `~/Documents/market_data/Databento/CME-Futures`, install the `data` extra and use `algo_mm.data`:
 
 ```bash
 uv pip install -e ".[data]"
