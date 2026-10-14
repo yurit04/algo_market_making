@@ -46,7 +46,7 @@ Requires **Python 3.12** and [uv](https://docs.astral.sh/uv/getting-started/inst
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yuriturygin/algo_market_making.git
+git clone https://github.com/yurit04/algo_market_making.git
 cd algo_market_making
 ```
 
