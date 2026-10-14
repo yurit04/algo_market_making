@@ -47,8 +47,6 @@ from algo_mm.rl.book import (
 # TRADE action code, used to rank instruments by activity.
 _TRADE_CODE = action_from_char("T")
 
-DEFAULT_ROOT = "/Users/yuriturygin/Documents/market_data/Databento/CME-Futures"
-
 
 @dataclass(frozen=True)
 class SessionWindow:
@@ -181,7 +179,6 @@ def preprocess(
     from symbology, pick the most-active one (unless ``symbol`` pins a specific outright),
     extract the session window, and write ``<out_dir>/<schema>/<symbol>/<date>.parquet``.
     """
-    root = str(root or DEFAULT_ROOT)
     root_sym = parent.split(".")[0]
     catalog = CMEDataCatalog(root)
     out_base = Path(out_dir) / "mbo"
